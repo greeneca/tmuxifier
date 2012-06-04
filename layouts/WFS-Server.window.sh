@@ -6,7 +6,7 @@ window_root "/home/greeneca/Documents/sites/whatsforsupper"
 # layout file name.
 new_window "WFS-Server"
 
-split_h 20
+split_v 20
 run_cmd "rails s -p 2345" 0
 select_pane 1
 
