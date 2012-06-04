@@ -155,18 +155,18 @@ initialize_session() {
     session="$1"
   fi
 
-  # Ensure tmux server is running for has-session check.
+  #echo Ensure tmux server is running for has-session check.
   tmux start-server
 
-  # Check if the named session already exists.
-  if ! tmux has-session -t "$session:" 2>/dev/null; then
-    # Create the new session.
+  #echo Check if the named session already exists.
+  if ! tmux has-session -t "$session:"; then
+    #echo Create the new session.
     env TMUX="" tmux new-session -d -s "$session"
 
-    # Set default-path for session
+    #echo Set default-path for session
     if [ -n "$session_root" ] && [ -d "$session_root" ]; then
       cd "$session_root"
-      tmux set-option -t "$session:" default-path "$session_root" 1>/dev/null
+      tmux set-option -t "$session:" default-path "$session_root"
     fi
 
     # In order to ensure only specified windows are created, we move the
