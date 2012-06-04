@@ -13,17 +13,34 @@
 #   - $2: (optional) Shell command to execute when window is created.
 #
 new_window() {
-  if [ -n "$1" ]; then
-    window="$1"
-  fi
-  local command=()
-  if [ -n "$2" ]; then
-    command+=("$2")
-  fi
-  if [ -n "$window" ]; then
-    local winarg=(-n "$window")
-  fi
+  if [ -n "$1" ]; then window="$1"; fi
+  if [ -n "$2" ]; then local command=("$2"); fi
+  if [ -n "$window" ]; then local winarg=(-n "$window"); fi
+
+  if [ -n "$window_root" ]; then cd "$window_root"; fi
   tmux new-window -t "$session:" "${winarg[@]}" "${command[@]}"
+}
+
+# Split current window/pane vertically.
+#
+# Arguments:
+#   - $1: (optional) Percentage of frame the new pane will use.
+#   - $2: (optional) Target pane ID to split in current window.
+#
+split_v() {
+  if [ -n "$1" ]; then local percentage=(-p "$1"); fi
+  tmux split-window -t "$session:$window.$2" -v "${percentage[@]}"
+}
+
+# Split current window/pane horizontally.
+#
+# Arguments:
+#   - $1: (optional) Percentage of frame the new pane will use.
+#   - $2: (optional) Target pane ID to split in current window.
+#
+split_h() {
+  if [ -n "$1" ]; then local percentage=(-p "$1"); fi
+  tmux split-window -t "$session:$window.$2" -h "${percentage[@]}"
 }
 
 # Select a specific window.
@@ -33,6 +50,50 @@ new_window() {
 #
 select_window() {
   tmux select-window -t "$session:$1"
+}
+
+# Select a specific pane in the current window.
+#
+# Arguments:
+#   - $1: Pane ID to select.
+#
+select_pane() {
+  tmux select-pane -t "$session:$window.$1"
+}
+
+# Runs a shell command in the currently active pane/window.
+#
+# Arguments:
+#   - $1: Shell command to run.
+#   - $2: (optional) Target pane ID to run command in.
+#
+run_cmd() {
+  tmux send-keys -t "$session:$window.$2" -l "$1"
+  tmux send-keys -t "$session:$window.$2" "C-m"
+}
+
+# Cusomize session root path. Default is `$HOME`.
+#
+# Arguments:
+#   - $1: Directory path to use for session root.
+#
+session_root() {
+  local dir="$(__expand_path $@)"
+  if [ -d "$dir" ]; then
+    session_root="$dir"
+  fi
+}
+
+# Customize window root path. Default is `$session_root`.
+#
+# Arguments:
+#   - $1: Directory path to use for window root.
+#
+window_root() {
+  local dir="$(__expand_path $@)"
+  if [ -d "$dir" ]; then
+    window_root="$dir"
+  fi
 }
 
 # Load specified window layout.
@@ -45,7 +106,7 @@ load_window() {
   if [ -f "$file" ]; then
     window="$1"
     source "$file"
-    window=""
+    window=
 
     # Reset `$window_root`.
     if [[ "$window_root" != "$session_root" ]]; then
@@ -77,30 +138,6 @@ load_session() {
   fi
 }
 
-# Cusomize session root path. Default is `$HOME`.
-#
-# Arguments:
-#   - $1: Directory path to use for session root.
-#
-session_root() {
-  local dir="$(__expand_path $@)"
-  if [ -d "$dir" ]; then
-    session_root="$dir"
-  fi
-}
-
-# Customize window root path. Default is `$session_root`.
-#
-# Arguments:
-#   - $1: Directory path to use for window root.
-#
-window_root() {
-  local dir="$(__expand_path $@)"
-  if [ -d "$dir" ]; then
-    cd "$dir"
-  fi
-}
-
 # Create a new session, returning 0 on success, 1 on failure.
 #
 # Arguments:
@@ -122,14 +159,14 @@ initialize_session() {
   tmux start-server
 
   # Check if the named session already exists.
-  if ! tmux has-session -t "$session" 2>/dev/null; then
+  if ! tmux has-session -t "$session:" 2>/dev/null; then
     # Create the new session.
-    env TMUX= tmux new-session -d -s "$session"
+    env TMUX="" tmux new-session -d -s "$session"
 
     # Set default-path for session
     if [ -n "$session_root" ] && [ -d "$session_root" ]; then
       cd "$session_root"
-      tmux set-option -t "$session" default-path "$session_root" 1>/dev/null
+      tmux set-option -t "$session:" default-path "$session_root" 1>/dev/null
     fi
 
     # In order to ensure only specified windows are created, we move the
@@ -156,6 +193,7 @@ initialize_session() {
 # If the session was created, we've already been switched to it. If it was not
 # created, the session already exists, and we'll need to specifically switch
 # to it here.
+#
 finalize_and_go_to_session() {
   ! tmux kill-window -t "$session:99" 2>/dev/null
   if [[ "$(tmuxifier-current-session)" != "$session" ]]; then
@@ -181,8 +219,8 @@ __expand_path() {
 
 __go_to_session() {
   if [ -z "$TMUX" ]; then
-    tmux -u attach-session -t "$session"
+    tmux -u attach-session -t "$session:"
   else
-    tmux -u switch-client -t "$session"
+    tmux -u switch-client -t "$session:"
   fi
 }
