@@ -175,7 +175,7 @@ initialize_session() {
     tmux move-window -s "$session:0" -t "$session:99"
 
     # Ensure correct pane splitting.
-    __go_to_session
+    finalize_and_go_to_session
 
     # Session created, return ok exit status.
     return 0
@@ -197,7 +197,7 @@ initialize_session() {
 finalize_and_go_to_session() {
   ! tmux kill-window -t "$session:99" 2>/dev/null
   if [[ "$(tmuxifier-current-session)" != "$session" ]]; then
-    __go_to_session
+    #__go_to_session
   fi
 }
 
@@ -219,8 +219,8 @@ __expand_path() {
 
 __go_to_session() {
   if [ -z "$TMUX" ]; then
-    tmux -u attach-session -t "$session:"
+    #tmux -u attach-session -t "$session:"
   else
-    tmux -u switch-client -t "$session:"
+    #tmux -u switch-client -t "$session:"
   fi
 }
