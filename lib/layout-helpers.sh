@@ -195,10 +195,10 @@ initialize_session() {
 # to it here.
 #
 finalize_and_go_to_session() {
-  ! tmux kill-window -t "$session:99" 2>/dev/null
-  if [[ "$(tmuxifier-current-session)" != "$session" ]]; then
+  ! tmux kill-window -t "$session:99"
+  #if [[ "$(tmuxifier-current-session)" != "$session" ]]; then
     #__go_to_session
-  fi
+  #fi
 }
 
 
@@ -218,9 +218,10 @@ __expand_path() {
 }
 
 __go_to_session() {
-  if [ -z "$TMUX" ]; then
+  echo "Go to session"
+  #if [ -z "$TMUX" ]; then
     #tmux -u attach-session -t "$session:"
-  else
+  #else
     #tmux -u switch-client -t "$session:"
-  fi
+  #fi
 }
