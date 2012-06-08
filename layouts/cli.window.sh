@@ -1,6 +1,6 @@
 # Set window root path. Default is `$session_root`.
 # Must be called before `new_window`.
-window_root "~/hummingbird/hummingbird_cli"
+window_root "~/Documents/hummingbird_cli"
 
 # Create new window. If no argument is given, window name will be based on
 # layout file name.
