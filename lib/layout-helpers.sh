@@ -172,7 +172,7 @@ initialize_session() {
     # In order to ensure only specified windows are created, we move the
     # default window to position 99, and later remove it with the
     # `finalize_session` function.
-    tmux move-window -s "$session:0" -t "$session:99"
+    tmux move-window -s "$session:1" -t "$session:99"
 
     # Ensure correct pane splitting.
     finalize_and_go_to_session
