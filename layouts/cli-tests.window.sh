@@ -4,12 +4,12 @@ window_root "~/Documents/hummingbird_cli"
 
 # Create new window. If no argument is given, window name will be based on
 # layout file name.
-new_window "cli"
+new_window "cli-tests"
 
 # Split window into panes.
-split_v 20
-split_h 50 1
-run_cmd 'bundle exec autotest' 2
+#split_v 20
+split_h 50
+run_cmd "be autotest" 0
 
 # Run commands.
 #run_cmd "top"     # runs in active pane

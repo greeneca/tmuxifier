@@ -6,10 +6,14 @@ session_root "~/Documents/"
 # argument is given, session name will be based on layout file name.
 if initialize_session "HBRD"; then
 
+  load_window "cms"
   load_window "cli"
+  load_window "loco"
+  load_window "cli-tests"
+  load_window "loco-tests"
 
   # Select the default active window on session creation.
-  #select_window 1
+  select_window 1
 
 fi
 
